@@ -6,14 +6,10 @@ export type EmotionState =
   | "calm";
 
 export interface EscalationEvent {
-  event_type: "passive_emotion" | "doctor_redirect";
+  eventType: "passive_emotion" | "doctor_redirect";
   severity?: "medium" | "high";
-  question_text?: string;
+  questionText?: string;
   reason: string;
-}
-
-export interface EscalationRecord extends EscalationEvent {
-  occurred_at?: string;
 }
 
 export interface SessionData {
@@ -23,12 +19,12 @@ export interface SessionData {
 }
 
 export interface SummaryData {
-  conversation_id: string;
-  patient_name: string;
-  topics_covered: string[];
-  questions_asked: { text: string; timestamp?: string }[];
-  escalation_count: number;
+  conversationId: string;
+  patientName: string;
+  topicsCovered: string[];
+  questionsAsked: { text: string; timestamp?: string }[];
+  escalationCount: number;
   escalations: EscalationEvent[];
-  ended_at?: string;
-  perception_notes?: string;
+  endedAt?: string;
+  perceptionNotes?: string;
 }

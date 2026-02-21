@@ -17,19 +17,17 @@ interface Props {
 }
 
 export default function EscalationToast({ escalation }: Props) {
-  // Track which escalation has been dismissed — visibility is derived
   const [dismissed, setDismissed] = useState<EscalationEvent | null>(null);
 
   const visible = escalation !== null && escalation !== dismissed;
 
   useEffect(() => {
     if (!escalation || escalation === dismissed) return;
-    // Auto-dismiss after 4s (setTimeout callback is async, not synchronous in effect)
     const timer = setTimeout(() => setDismissed(escalation), 4000);
     return () => clearTimeout(timer);
   }, [escalation, dismissed]);
 
-  const config = escalation ? MESSAGES[escalation.event_type] : null;
+  const config = escalation ? MESSAGES[escalation.eventType] : null;
 
   if (!visible || !config) return null;
 

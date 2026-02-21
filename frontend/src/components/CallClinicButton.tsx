@@ -26,7 +26,7 @@ export default function CallClinicButton() {
         >
           Call Clinic
           <span className="text-white/70 text-xs font-normal">
-            M-F 8am–5pm
+            M-F 8am-5pm
           </span>
         </a>
         <a
