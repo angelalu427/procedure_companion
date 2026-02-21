@@ -1,7 +1,6 @@
 import json
-import asyncio
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import StreamingResponse
 
 from db.connection import db_conn
@@ -9,21 +8,15 @@ from models.schemas import (
     ConversationCreateRequest,
     ConversationCreateResponse,
     ConversationSummaryResponse,
+    EscalationItem,
     EscalationLogRequest,
     EscalationLogResponse,
 )
+from services.sse import register_listener, unregister_listener
 from services.tavus import create_conversation, end_conversation
+from services.webhook_processor import buffer_perception
 
 router = APIRouter()
-
-# SSE listeners: conversation_id -> list of asyncio.Queue
-_sse_queues: dict[str, list[asyncio.Queue]] = {}
-
-
-def notify_summary_ready(conversation_id: str):
-    """Push a summarized event to all SSE listeners for a conversation."""
-    for q in _sse_queues.pop(conversation_id, []):
-        q.put_nowait({"status": "summarized"})
 
 
 @router.post("/conversations", response_model=ConversationCreateResponse)
@@ -72,6 +65,15 @@ async def log_escalation(conversation_id: str, req: EscalationLogRequest):
     return {"escalation_id": str(escalation_id)}
 
 
+@router.post("/conversations/{conversation_id}/perception")
+async def log_perception(conversation_id: str, request: Request):
+    """Accept accumulated perception observations from the frontend."""
+    body = await request.json()
+    observations = body.get("observations", [])
+    buffer_perception(conversation_id, observations)
+    return {"ok": True}
+
+
 @router.get(
     "/conversations/{conversation_id}/summary",
     response_model=ConversationSummaryResponse,
@@ -100,13 +102,13 @@ async def get_summary(conversation_id: str):
                 (conversation_id,),
             )
             escalations = [
-                {
-                    "event_type": r[0],
-                    "severity": r[1],
-                    "question_text": r[2],
-                    "reason": r[3],
-                    "occurred_at": r[4].isoformat() if r[4] else None,
-                }
+                EscalationItem(
+                    event_type=r[0],
+                    severity=r[1],
+                    question_text=r[2],
+                    reason=r[3],
+                    occurred_at=r[4].isoformat() if r[4] else None,
+                )
                 for r in cur.fetchall()
             ]
 
@@ -124,16 +126,13 @@ async def get_summary(conversation_id: str):
 
 @router.get("/conversations/{conversation_id}/stream")
 async def stream_summary(conversation_id: str):
-    queue: asyncio.Queue = asyncio.Queue()
-    _sse_queues.setdefault(conversation_id, []).append(queue)
+    queue = register_listener(conversation_id)
 
     async def event_generator():
         try:
             event = await queue.get()
             yield f"data: {json.dumps(event)}\n\n"
         finally:
-            listeners = _sse_queues.get(conversation_id, [])
-            if queue in listeners:
-                listeners.remove(queue)
+            unregister_listener(conversation_id, queue)
 
     return StreamingResponse(event_generator(), media_type="text/event-stream")
