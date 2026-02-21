@@ -15,9 +15,9 @@ async def create_conversation(patient_name: str) -> dict:
             f"Patient name: {patient_name}. Address them by name throughout the conversation.\n"
             f"Your role is educational and supportive only — not diagnostic.\n\n"
             f"Clinic contacts:\n"
-            f"- M-F 8am-5pm: 415-353-7475 (option 2 for Nurse)\n"
-            f"- After-hours / Weekends: 415-561-9020\n"
-            f"- UCSF ER: 415-353-1238"
+            f"- M-F 8am-5pm: 4 1 5, 3 5 3, 7 4 7 5 (option 2 for Nurse)\n"
+            f"- After-hours / Weekends: 4 1 5, 5 6 1, 9 0 2 0\n"
+            f"- UCSF ER: 4 1 5, 3 5 3, 1 2 3 8"
         ),
         "callback_url": f"{WEBHOOK_URL}/api/webhooks/tavus",
         "document_tags": ["egg-retrieval-companion"],
