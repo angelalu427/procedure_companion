@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import DailyIframe, { type DailyCall } from "@daily-co/daily-js";
 import type { EmotionState, EscalationEvent } from "../types";
-import { logEscalation } from "../services/api";
+import { logEscalation, logPerception } from "../services/api";
 
 function mapToEmotion(emotionalContext: string): EmotionState {
   const s = emotionalContext.toLowerCase();
@@ -23,12 +23,15 @@ export function useDailySession(
   const [emotion, setEmotion] = useState<EmotionState>("neutral");
   const [latestEscalation, setLatestEscalation] =
     useState<EscalationEvent | null>(null);
+  // Guards against double-navigation: left-meeting fires both on explicit
+  // leaveCall() and on server-side disconnect; endedRef ensures onSessionEnded runs once.
   const endedRef = useRef(false);
+  const emotionLogRef = useRef<{ emotion: string }[]>([]);
 
   useEffect(() => {
     if (!conversationUrl) return;
 
-    // Prevent duplicate instances (React StrictMode double-invokes effects)
+    // StrictMode guard: prevent duplicate Daily call objects
     if (initedRef.current) return;
     initedRef.current = true;
 
@@ -48,11 +51,6 @@ export function useDailySession(
       if (!event?.data) return;
       const msg = event.data;
 
-      // Debug: log all app-message events to inspect Tavus CVI format
-      console.log("[app-message]", JSON.stringify(msg, null, 2));
-
-      // Tool call events from Tavus CVI
-      // Format: event_type "conversation.tool_call", properties.name, properties.arguments (JSON string)
       if (msg.event_type === "conversation.tool_call" && msg.properties) {
         const toolName = msg.properties.name;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -60,12 +58,15 @@ export function useDailySession(
         try {
           args = JSON.parse(msg.properties.arguments || "{}");
         } catch {
-          console.error("Failed to parse tool arguments:", msg.properties.arguments);
+          console.error(
+            "Failed to parse tool arguments:",
+            msg.properties.arguments,
+          );
         }
 
         if (toolName === "flag_passive_emotion") {
           const escalation: EscalationEvent = {
-            event_type: "passive_emotion",
+            eventType: "passive_emotion",
             severity: args.severity,
             reason: args.reason,
           };
@@ -78,8 +79,8 @@ export function useDailySession(
           });
         } else if (toolName === "redirect_to_doctor") {
           const escalation: EscalationEvent = {
-            event_type: "doctor_redirect",
-            question_text: args.question,
+            eventType: "doctor_redirect",
+            questionText: args.question,
             reason: args.reason,
           };
           setLatestEscalation(escalation);
@@ -92,31 +93,42 @@ export function useDailySession(
         }
       }
 
-      // Emotion from Raven-1 utterance events
-      // Format: event_type "conversation.utterance", properties.user_audio_analysis (plain string)
       if (
         msg.event_type === "conversation.utterance" &&
         msg.properties?.role === "user" &&
         msg.properties?.user_audio_analysis
       ) {
-        setEmotion(mapToEmotion(msg.properties.user_audio_analysis));
+        const mapped = mapToEmotion(msg.properties.user_audio_analysis);
+        setEmotion(mapped);
+        emotionLogRef.current.push({ emotion: mapped });
       }
     });
 
     call.join({ url: conversationUrl });
-
-    // No cleanup — Daily call object lives for the lifetime of the page.
-    // leaveCall() handles teardown when the user ends the session.
   }, [conversationUrl, conversationId, onSessionEnded]);
+
+  const flushPerception = useCallback(async () => {
+    if (emotionLogRef.current.length > 0) {
+      const batch = emotionLogRef.current;
+      emotionLogRef.current = [];
+      await logPerception(conversationId, batch).catch(() => {});
+    }
+  }, [conversationId]);
 
   const leaveCall = useCallback(async () => {
     if (callRef.current) {
-      endedRef.current = true;
       await callRef.current.leave();
       callRef.current.destroy();
       callRef.current = null;
     }
   }, []);
 
-  return { callRef, isConnected, emotion, latestEscalation, leaveCall };
+  return {
+    callRef,
+    isConnected,
+    emotion,
+    latestEscalation,
+    leaveCall,
+    flushPerception,
+  };
 }
