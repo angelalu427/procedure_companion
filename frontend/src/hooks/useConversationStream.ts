@@ -1,31 +1,39 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { getConversationSummary } from "../services/api";
 import type { SummaryData } from "../types";
 
 export function useConversationStream(conversationId: string) {
   const [summary, setSummary] = useState<SummaryData | null>(null);
   const [loading, setLoading] = useState(true);
-  const initedRef = useRef(false);
 
   useEffect(() => {
-    if (!conversationId || initedRef.current) return;
-    initedRef.current = true;
+    if (!conversationId) return;
 
     let es: EventSource | null = null;
     let pollTimer: ReturnType<typeof setInterval> | null = null;
+    let cancelled = false;
 
     async function fetchSummary(): Promise<boolean> {
-      const result = await getConversationSummary(conversationId);
-      if (result) {
-        setSummary(result);
-        setLoading(false);
-        return true;
+      try {
+        const result = await getConversationSummary(conversationId);
+        if (cancelled) return false;
+        if (result) {
+          setSummary(result);
+          setLoading(false);
+          return true;
+        }
+        return false;
+      } catch {
+        if (!cancelled) setLoading(false);
+        return false;
       }
-      return false;
     }
 
+    // Strategy: try GET first (summary may already exist), then fall back to
+    // SSE stream + polling as a safety net if the SSE connection drops.
     async function init() {
       if (await fetchSummary()) return;
+      if (cancelled) return;
 
       es = new EventSource(`/api/conversations/${conversationId}/stream`);
       es.onmessage = async (event) => {
@@ -51,7 +59,11 @@ export function useConversationStream(conversationId: string) {
 
     init();
 
-    // No cleanup — initedRef prevents re-init, and poll/SSE self-terminate on success
+    return () => {
+      cancelled = true;
+      es?.close();
+      if (pollTimer) clearInterval(pollTimer);
+    };
   }, [conversationId]);
 
   return { summary, loading };
