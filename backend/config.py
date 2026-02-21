@@ -13,8 +13,8 @@ def require_env(name: str) -> str:
 
 
 TAVUS_API_KEY = require_env("TAVUS_API_KEY")
-TAVUS_REPLICA_ID = os.getenv("TAVUS_REPLICA_ID", "r3f427f43c9d")
 TAVUS_PERSONA_ID = require_env("TAVUS_PERSONA_ID")
+TAVUS_REPLICA_ID = os.getenv("TAVUS_REPLICA_ID") or "r3f427f43c9d"
 WEBHOOK_URL = require_env("WEBHOOK_URL")
 
 DATABASE_URL = os.getenv(

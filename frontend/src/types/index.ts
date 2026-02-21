@@ -1,10 +1,19 @@
-export type EmotionState = 'neutral' | 'anxious' | 'confused' | 'distressed' | 'calm';
+export type EmotionState =
+  | "neutral"
+  | "anxious"
+  | "confused"
+  | "distressed"
+  | "calm";
 
 export interface EscalationEvent {
-  event_type: 'passive_emotion' | 'doctor_redirect';
-  severity?: 'medium' | 'high';
+  event_type: "passive_emotion" | "doctor_redirect";
+  severity?: "medium" | "high";
   question_text?: string;
   reason: string;
+}
+
+export interface EscalationRecord extends EscalationEvent {
+  occurred_at?: string;
 }
 
 export interface SessionData {
@@ -19,13 +28,7 @@ export interface SummaryData {
   topics_covered: string[];
   questions_asked: { text: string; timestamp?: string }[];
   escalation_count: number;
-  escalations: {
-    event_type: string;
-    severity?: string;
-    question_text?: string;
-    reason: string;
-    occurred_at?: string;
-  }[];
+  escalations: EscalationEvent[];
   ended_at?: string;
   perception_notes?: string;
 }

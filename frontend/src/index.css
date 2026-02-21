@@ -1,13 +1,73 @@
 @import "tailwindcss";
 
 @theme {
+  /* Primary palette — deep medical teal */
+  --color-ucsf-primary: #0F766E;
   --color-ucsf-teal: #1DA1A1;
-  --color-ucsf-bg: #FAFAFA;
-  --color-ucsf-text: #64748B;
+  --color-ucsf-teal-light: #CCFBF1;
+
+  /* Surfaces */
+  --color-ucsf-bg: #F7F5F2;
+  --color-ucsf-card: #FFFFFF;
+  --color-ucsf-border: #E8E4DF;
+
+  /* Text */
+  --color-ucsf-heading: #1E293B;
+  --color-ucsf-text: #475569;
+  --color-ucsf-muted: #94A3B8;
+
+  /* Accents */
+  --color-ucsf-sage: #D1E7DD;
+  --color-ucsf-warm: #FEF3C7;
+  --color-ucsf-rose: #FFE4E6;
+
+  /* Fonts */
+  --font-heading: "Lora", Georgia, serif;
+  --font-body: "Outfit", system-ui, sans-serif;
 }
 
 body {
   margin: 0;
   background-color: var(--color-ucsf-bg);
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: var(--font-body);
+  color: var(--color-ucsf-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Subtle noise texture overlay */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* Staggered fade-in animation */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.5s ease-out both;
+}
+
+/* Pulse dot for live indicator */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.animate-pulse-dot {
+  animation: pulse-dot 1.5s ease-in-out infinite;
 }
