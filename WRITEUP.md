@@ -33,7 +33,7 @@ The app has three layers: a React frontend, a FastAPI backend, and the Tavus CVI
 7. The backend summarizes the transcript using rule-based keyword matching (no external LLM call) — extracting topics covered and questions the patient asked — then merges in the perception notes compiled from Raven-1 observations.
 8. An SSE notification tells the frontend the summary is ready, and the patient sees a recap page with topics covered, their questions, emotional observations, and any items flagged for their doctor.
 
-![Session summary page](screenshots/summary.png)
+<img src="screenshots/summary.png" alt="Session summary page" width="500">
 
 **Key design decisions:**
 
