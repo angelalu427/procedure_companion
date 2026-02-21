@@ -2,7 +2,7 @@
 
 ## Why this project
 
-I chose to build a Pre-Procedure Companion to help patients get mentally and cognitively prepared for medical procedures (using egg retrieval as an example) because it showcases what makes Tavus uniquely powerful, i.e., its capability to read and understand the user's emotion in real-time and to adapt its responses accordingly. 
+I chose to build a Procedure Companion to help patients get mentally and cognitively prepared for medical procedures (using egg retrieval as an example) because it showcases what makes Tavus uniquely powerful, i.e., its capability to read and understand the user's emotion in real-time and to adapt its responses accordingly. 
 
 Preparing for a medical procedure can be daunting and overwhelming. Patients often leave their consultations with a stack of pamphlets, many unanswered questions, and anxiety. The period between "you're scheduled" and "arrive at 6am, nothing to eat after midnight" is filled with uncertainty, and medical staff are not always immediately reachable. Traditional chatbots can answer questions, but they cannot perceive and respond to negative emotions in real time. 
 

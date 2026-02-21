@@ -1,6 +1,6 @@
 # Procedure Companion
 
-An AI-powered pre-procedure education app for patients preparing for egg retrieval. Patients have a video conversation with **Maya**, a virtual patient educator built on [Tavus CVI](https://docs.tavus.io/), who answers questions using a curated knowledge base, detects patient emotion in real-time, adapts accordingly, flags high-level passive emotions (like anxiety, distress, and confusion) and escalates high-stake medical questions to the care team.
+An AI-powered medical procedure education app for patients preparing for egg retrieval. Patients have a video conversation with **Maya**, a virtual patient educator built on [Tavus CVI](https://docs.tavus.io/), who answers questions using a curated knowledge base, detects patient emotion in real-time, adapts accordingly, flags high-level passive emotions (like anxiety, distress, and confusion) and escalates high-stake medical questions to the care team.
 
 ## Prerequisites
 
