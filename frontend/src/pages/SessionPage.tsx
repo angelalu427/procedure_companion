@@ -23,7 +23,7 @@ export default function SessionPage() {
     });
   }, [state, navigate]);
 
-  const { callRef, isConnected, emotion, latestEscalation, leaveCall } =
+  const { callRef, isConnected, emotion, latestEscalation, leaveCall, flushPerception } =
     useDailySession(
       state?.conversationUrl || "",
       state?.conversationId || "",
@@ -35,14 +35,12 @@ export default function SessionPage() {
     setEnding(true);
     setHasEnded(true);
     try {
+      await flushPerception();
       await endConversation(state.conversationId);
     } catch {
       // Continue even if the API call fails
     }
     await leaveCall();
-    navigate(`/summary/${state.conversationId}`, {
-      state: { patientName: state.patientName },
-    });
   }
 
   useEffect(() => {

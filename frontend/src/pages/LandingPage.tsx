@@ -12,13 +12,11 @@ export default function LandingPage() {
     if (!name.trim() || loading) return;
     setLoading(true);
     try {
-      const { conversation_id, conversation_url } = await createConversation(
-        name.trim(),
-      );
+      const result = await createConversation(name.trim());
       navigate("/session", {
         state: {
-          conversationId: conversation_id,
-          conversationUrl: conversation_url,
+          conversationId: result.conversationId,
+          conversationUrl: result.conversationUrl,
           patientName: name.trim(),
         },
       });
@@ -71,7 +69,7 @@ export default function LandingPage() {
                 className="block text-ucsf-heading mb-2 tracking-widest uppercase"
                 style={{ fontSize: "0.7rem" }}
               >
-                Your First Name
+                Your Name
               </label>
               <input
                 id="patient-name"
