@@ -1,7 +1,5 @@
 """Rule-based transcript summarizer — no external LLM calls."""
 
-import re
-
 TOPIC_KEYWORDS: dict[str, list[str]] = {
     "Anesthesia & sedation": ["anesthesia", "sedation", "asleep", "awake"],
     "Ovarian stimulation": ["stimulation", "injection", "gonal", "medication"],
@@ -61,14 +59,12 @@ def generate_summary(transcript: list[dict]) -> dict:
         entry.get("content", "") for entry in transcript
     ).lower()
 
-    # Topic detection
     topics_covered = [
         topic
         for topic, keywords in TOPIC_KEYWORDS.items()
         if any(kw in full_text for kw in keywords)
     ]
 
-    # Question detection from user utterances
     questions_asked = []
     for entry in transcript:
         if entry.get("role") != "user":

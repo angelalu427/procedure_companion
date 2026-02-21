@@ -5,7 +5,6 @@ Copy the returned TAVUS_PERSONA_ID into .env.
 
 import sys
 import asyncio
-from pathlib import Path
 from config import (
     TAVUS_API_KEY,
     TAVUS_REPLICA_ID,
@@ -17,7 +16,6 @@ import httpx
 TAVUS_BASE = "https://tavusapi.com"
 HEADERS = {"x-api-key": TAVUS_API_KEY, "Content-Type": "application/json"}
 
-DATA_DIR = Path(__file__).parent / "data"
 DOCUMENT_TAG = "egg-retrieval-companion"
 DOCUMENTS = [
     "egg_freezing_overview.txt",
