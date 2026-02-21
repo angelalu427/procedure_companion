@@ -15,15 +15,25 @@ The app has three layers: a React frontend, a FastAPI backend, and the Tavus CVI
 **User flow:**
 
 1. The patient enters their name on the landing page.
+
+![Landing page](screenshots/landing_page.png)
+
 2. The backend creates a Tavus conversation (passing the patient's name, clinic information, and a knowledge base tag as context) and stores a record in PostgreSQL.
 3. The frontend joins the Daily.co room returned by Tavus and renders the video call.
 4. During the call, the frontend listens for CVI app-message events:
    - **Emotion detection** — Raven-1's `user_audio_analysis` is mapped to an emotion state (anxious, confused, distressed, calm, and neutral) and shown as a live visual indicator (i.e., the changing color effect around the video). These observations are buffered client-side. The detection of passive emotions (anxious, confused, and distressed) would also display a reassuring message at the top of the video.
+
+   ![Anxiety detected — reassuring message and warm glow around the video](screenshots/anxiety.png)
+
    - **Tool calls** — Maya has two tools: `flag_passive_emotion` for logging distress events, and `redirect_to_doctor` for questions that require medical judgment (diagnosis, medication changes, etc.). When either fires, the frontend logs an escalation to the backend and shows a toast notification at the bottom of the video.
+
+   ![Redirect-to-doctor toast notification](screenshots/redirect_to_doctor.png)
 5. When the patient ends the call, the frontend flushes buffered emotion observations to the backend and tells Tavus to end the conversation.
 6. Tavus sends webhooks: `system.shutdown` marks the conversation as ended, and `transcription_ready` triggers summary generation.
 7. The backend summarizes the transcript using rule-based keyword matching (no external LLM call) — extracting topics covered and questions the patient asked — then merges in the perception notes compiled from Raven-1 observations.
 8. An SSE notification tells the frontend the summary is ready, and the patient sees a recap page with topics covered, their questions, emotional observations, and any items flagged for their doctor.
+
+![Session summary page](screenshots/summary.png)
 
 **Key design decisions:**
 
