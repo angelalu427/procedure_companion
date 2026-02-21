@@ -1,25 +1,18 @@
 """
 One-time Tavus setup — run both functions before starting the server.
-
-  1. Fill TAVUS_API_KEY, TAVUS_REPLICA_ID, and WEBHOOK_URL in .env
-  2. Run:  uv run python -c "from tavus_setup import upload_documents; upload_documents()"
-  3. Wait a few minutes for Tavus to process, then:
-     uv run python -c "from setup_once import create_persona; create_persona()"
-  4. Copy the printed TAVUS_PERSONA_ID into .env
+Copy the returned TAVUS_PERSONA_ID into .env.
 """
 
-import os
 import sys
 import asyncio
 from pathlib import Path
+from config import (
+    TAVUS_API_KEY,
+    TAVUS_REPLICA_ID,
+    WEBHOOK_URL,
+)
 
 import httpx
-from dotenv import load_dotenv
-
-load_dotenv()
-
-TAVUS_API_KEY = os.getenv("TAVUS_API_KEY", "")
-WEBHOOK_URL = os.getenv("WEBHOOK_URL", "").rstrip("/")
 
 TAVUS_BASE = "https://tavusapi.com"
 HEADERS = {"x-api-key": TAVUS_API_KEY, "Content-Type": "application/json"}
@@ -135,11 +128,11 @@ async def create_persona() -> str:
         payload = {
             "persona_name": "Maya - UCSF Egg Retrieval Companion",
             "system_prompt": SYSTEM_PROMPT,
-            "default_replica_id": "r3f427f43c9d",
+            "default_replica_id": TAVUS_REPLICA_ID,
             "layers": {
                 "llm": {
                     "tools": TOOLS,
-                    "extra_body": {"temperature": 0, "top_p": 0.9},
+                    "extra_body": {"temperature": 0.2, "top_p": 0.9},
                 },
                 "perception": {"perception_model": "raven-1"},
             },
