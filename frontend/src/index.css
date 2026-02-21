@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ucsf-teal: #1DA1A1;
+  --color-ucsf-bg: #FAFAFA;
+  --color-ucsf-text: #64748B;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-ucsf-bg);
+  font-family: system-ui, -apple-system, sans-serif;
+}
